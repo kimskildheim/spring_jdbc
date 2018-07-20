@@ -1,21 +1,20 @@
 package com.pluralsight.repository;
 
+import com.pluralsight.model.Ride;
+import com.pluralsight.repository.util.RideRowMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import com.pluralsight.repository.util.RideRowMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
-
-import com.pluralsight.model.Ride;
-
-@Repository("rideRepository")
-public class RideRepositoryImpl implements RideRepository {
+//@Repository("rideRepository")
+public class RideRepositoryImplNamedParameters implements RideRepository {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -72,7 +71,13 @@ public class RideRepositoryImpl implements RideRepository {
     }
 
     @Override
+
+    //Works best with many parameters (like in a search) so you dont need to fix the order of the ?-marks
     public void deleteRide(Integer id) {
-        jdbcTemplate.update("delete from ride where id = ?", id);
+        NamedParameterJdbcTemplate namedTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("id", id);
+
+        namedTemplate.update("delete from ride where id = :id", paramMap);
     }
 }
